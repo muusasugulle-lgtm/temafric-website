@@ -80,6 +80,10 @@
         en: 'Your request could not be sent from this page. Please email <a href="mailto:sales@temafric.com">sales@temafric.com</a> or use the WhatsApp button to send it.',
         fr: 'Votre demande n’a pas pu être envoyée depuis cette page. Écrivez-nous à <a href="mailto:sales@temafric.com">sales@temafric.com</a> ou utilisez le bouton WhatsApp pour l’envoyer.'
       },
+      activate: {
+        en: 'This form is not activated yet. Open the email from FormSubmit in the sales@temafric.com inbox (check spam too), click <b>Activate Form</b>, then send your request again.',
+        fr: 'Ce formulaire n’est pas encore activé. Ouvrez l’e-mail de FormSubmit dans la boîte sales@temafric.com (vérifiez aussi les spams), cliquez sur <b>Activate Form</b>, puis renvoyez votre demande.'
+      },
       sending: { en: 'Sending…', fr: 'Envoi…' }
     };
     return m[key][lang()];
@@ -141,6 +145,8 @@
           show('ok', msg('ok'));
           form.reset();
           if (started) started.value = String(Math.floor(Date.now() / 1000));
+        } else if (data && /activat/i.test(String(data.message || ''))) {
+          show('err', msg('activate'));
         } else {
           show('err', msg('err'));
         }
