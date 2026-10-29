@@ -99,20 +99,45 @@
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     if (!form.reportValidity()) return;
+    // Bot traps: hidden field filled, or form sent within 3 seconds of loading
+    var ts = started ? parseInt(started.value, 10) : 0;
+    if (val('q-website') || (ts && Date.now() / 1000 - ts < 3)) {
+      show('ok', msg('ok'));
+      form.reset();
+      return;
+    }
     var label = submitBtn.innerHTML;
     submitBtn.disabled = true;
     submitBtn.textContent = msg('sending');
     var ctrl = window.AbortController ? new AbortController() : null;
     var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 20000);
-    fetch(form.getAttribute('action') || 'quote.php', {
+    var who = val('q-company') || val('q-name');
+    var payload = {
+      _subject: 'Quotation request: ' + (optText('q-product') || '-') + ' — ' + who,
+      _template: 'table',
+      _captcha: 'false',
+      _replyto: val('q-email'),
+      'Name': val('q-name'),
+      'Company': val('q-company') || '-',
+      'Email': val('q-email'),
+      'Phone / WhatsApp': val('q-phone'),
+      'Country': val('q-country') || '-',
+      'Product': optText('q-product') || '-',
+      'Quantity': val('q-qty') || '-',
+      'Delivery location': val('q-location') || '-',
+      'Required by': val('q-date') || '-',
+      'Details': val('q-message'),
+      'Site language': lang().toUpperCase()
+    };
+    fetch(form.getAttribute('action'), {
       method: 'POST',
-      body: new FormData(form),
-      headers: { 'Accept': 'application/json' },
+      body: JSON.stringify(payload),
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       signal: ctrl ? ctrl.signal : undefined
     })
       .then(function (r) { return r.json(); })
       .then(function (data) {
-        if (data && data.ok) {
+        if (data && (data.success === true || data.success === 'true')) {
           show('ok', msg('ok'));
           form.reset();
           if (started) started.value = String(Math.floor(Date.now() / 1000));
