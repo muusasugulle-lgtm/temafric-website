@@ -34,6 +34,11 @@
     if (b) {
       var l = b.getAttribute('data-set-lang');
       store(l);
+      var href = root.getAttribute('data-href-' + l);
+      if (href && l !== root.getAttribute('data-lang')) {
+        window.location.href = href;   // separate EN / FR pages on the live site
+        return;
+      }
       applyLang(l);
     }
   });
